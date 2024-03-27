@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.tomcat.util.log.UserDataHelper.Mode;
+
 import Connection.SingleConectionBanco;
 import Model.ModelLogin;
 
@@ -18,40 +20,87 @@ public class DAOUsuarioRepository {
 
 	public ModelLogin gravarUsuario(ModelLogin objeto) throws SQLException {
 
-		String sql = "INSERT INTO model_login(login, senha, nome, email) VALUES (?, ?, ?, ?);";
-		PreparedStatement preparesql = connection.prepareStatement(sql);
-		preparesql.setString(1, objeto.getLogin());
-		preparesql.setString(2, objeto.getSenha());
-		preparesql.setString(3, objeto.getNome());
-		preparesql.setString(4, objeto.getEmail());
-		preparesql.execute(); //faça isso!
-		connection.commit(); // e grave no bd!
-		
-		return this.consultaUsuario(objeto.getLogin());
+		if (objeto.isnovo()) {
+			String sql = "INSERT INTO model_login(login, senha, nome, email) VALUES (?, ?, ?, ?);";
+			PreparedStatement preparesql = connection.prepareStatement(sql);
+			preparesql.setString(1, objeto.getLogin());
+			preparesql.setString(2, objeto.getSenha());
+			preparesql.setString(3, objeto.getNome());
+			preparesql.setString(4, objeto.getEmail());
+			preparesql.execute(); // faça isso!
+			connection.commit(); // e grave no bd!
 
+			return this.consultaUsuario(objeto.getLogin());
+		} else {
+			this.atualizaUsuario(objeto);
+
+		}
+		return objeto;
 	}
-	
+
 	public ModelLogin consultaUsuario(String login) throws SQLException {
-		
-		ModelLogin modelLogin=new ModelLogin();
-		
-		String sql = "SELECT*FROM model_login where upper(login)= upper('?');";
-		
-		PreparedStatement consulta = connection.prepareStatement(sql);		
-		
-		ResultSet resultado= consulta.executeQuery(); //execute , não passar o sql duas vezes
-		
-		while(resultado.next()) {//se tem resultado, tras ele.
-			
-			//preenche o objeto e retornar
+
+		ModelLogin modelLogin = new ModelLogin();
+
+		String sql = "SELECT*FROM model_login where upper(login)= upper('" + login + "');";
+
+		PreparedStatement consulta = connection.prepareStatement(sql);
+
+		ResultSet resultado = consulta.executeQuery(); // execute , não passar o sql duas vezes
+
+		while (resultado.next()) {// se tem resultado, tras ele.
+
+			// preenche o objeto e retornar
 			modelLogin.setId(resultado.getLong("id"));
 			modelLogin.setNome(resultado.getString("nome"));
 			modelLogin.setEmail(resultado.getString("email"));
 			modelLogin.setLogin(resultado.getString("login"));
 			modelLogin.setSenha(resultado.getString("senha"));
-			
+
 		}
 		return modelLogin;
-		
+
 	}
+
+	// se já existe o login cadastrado
+	public boolean validaLogin(String login) throws SQLException {
+
+		String sql = "select count(*) > 0 as existe from model_login where upper(login) = upper('" + login + "');";
+		PreparedStatement consulta = connection.prepareStatement(sql);
+		ResultSet resultado = consulta.executeQuery(); // execute , não passar o sql duas vezes
+
+		resultado.next();// para entrar nos resultados e avançar como se fosse um ponteiro
+
+		return resultado.getBoolean("existe");
+
+	}
+
+	// atualizar
+	public ModelLogin atualizaUsuario(ModelLogin objeto) throws SQLException {
+
+		String sql = "UPDATE model_login SET login=?, senha=?, nome=?, email=? WHERE id=" + objeto.getId() + ";";
+		PreparedStatement atualiza = connection.prepareStatement(sql);
+		atualiza.setString(1, objeto.getLogin());
+		atualiza.setString(2, objeto.getSenha());
+		atualiza.setString(3, objeto.getNome());
+		atualiza.setString(4, objeto.getEmail());
+
+		atualiza.executeUpdate(); // faça isso!
+		connection.commit(); // e grave no bd!
+
+		return objeto;
+	}
+	
+	//deletar
+	public void deletarID(String idUser) throws SQLException {
+		
+		String sql="DELETE FROM model_login WHERE id=?;";
+		PreparedStatement delete= connection.prepareStatement(sql);
+		delete.setLong(1, Long.parseLong(idUser));
+		delete.executeUpdate();
+		
+		connection.commit();
+	}
+
+	
 }

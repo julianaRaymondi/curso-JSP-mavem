@@ -4,14 +4,12 @@ public class ModelLogin {
 
 	private static final long serialVersionUID = 1L;
 
-	
 	private Long id;
 	private String nome;
-	private String email;	
+	private String email;
 	private String login;
 	private String senha;
-	
-	
+
 	
 
 	public Long getId() {
@@ -52,6 +50,17 @@ public class ModelLogin {
 
 	public void setSenha(String senha) {
 		this.senha = senha;
+	}
+
+	public boolean isnovo() {
+		if (this.id == null) {
+			return true;//inserir novo
+
+		} else if (this.id != null && this.id > 0) {
+			return false;// atualiza
+		}
+
+		return id == null;
 	}
 
 }
