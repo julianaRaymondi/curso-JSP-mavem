@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.tomcat.util.log.UserDataHelper.Mode;
 
@@ -37,6 +39,36 @@ public class DAOUsuarioRepository {
 		}
 		return objeto;
 	}
+	
+	
+	public List<ModelLogin> buscaUsuario(String nome) throws SQLException{
+		
+		List<ModelLogin> retorno = new ArrayList<ModelLogin>();
+		
+		String sql = "SELECT*FROM model_login where upper(nome) like upper(?)";
+		PreparedStatement busca= connection.prepareStatement(sql);
+		busca.setString(1, "%"+nome+"%");
+		
+		ResultSet resultado= busca.executeQuery();
+		
+		
+		while(resultado.next()) {
+			
+			ModelLogin modelLogin=new ModelLogin(); 
+			
+			modelLogin.setId(resultado.getLong("id"));
+			modelLogin.setLogin(resultado.getString("login"));
+			modelLogin.setNome(resultado.getString("nome"));
+			modelLogin.setEmail(resultado.getString("email"));
+			
+			retorno.add(modelLogin);
+		}
+		
+		
+		
+		return retorno;
+	}
+	
 
 	public ModelLogin consultaUsuario(String login) throws SQLException {
 
@@ -61,6 +93,8 @@ public class DAOUsuarioRepository {
 		return modelLogin;
 
 	}
+	
+	
 
 	// se já existe o login cadastrado
 	public boolean validaLogin(String login) throws SQLException {
@@ -101,6 +135,34 @@ public class DAOUsuarioRepository {
 		
 		connection.commit();
 	}
+
+	public ModelLogin verEditar(String id) throws SQLException {
+		ModelLogin modelLogin = new ModelLogin();
+
+		String sql = "SELECT*FROM model_login where id=?;";
+
+		PreparedStatement consulta = connection.prepareStatement(sql);
+		consulta.setLong(1, Long.parseLong(id));
+
+		ResultSet resultado = consulta.executeQuery(); // execute , não passar o sql duas vezes
+
+		while (resultado.next()) {// se tem resultado, tras ele.
+
+			// preenche o objeto e retornar
+			modelLogin.setId(resultado.getLong("id"));
+			modelLogin.setNome(resultado.getString("nome"));
+			modelLogin.setEmail(resultado.getString("email"));
+			modelLogin.setLogin(resultado.getString("login"));
+			modelLogin.setSenha(resultado.getString("senha"));
+
+		}
+		return modelLogin;
+		
+	}
+
+	
+
+	
 
 	
 }
