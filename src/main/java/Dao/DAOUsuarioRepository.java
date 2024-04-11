@@ -45,7 +45,7 @@ public class DAOUsuarioRepository {
 		
 		List<ModelLogin> retorno = new ArrayList<ModelLogin>();
 		
-		String sql = "SELECT*FROM model_login where upper(nome) like upper(?)";
+		String sql = "SELECT*FROM model_login where upper(nome) like upper(?) and useradmin is false";
 		PreparedStatement busca= connection.prepareStatement(sql);
 		busca.setString(1, "%"+nome+"%");
 		
@@ -74,7 +74,7 @@ public class DAOUsuarioRepository {
 
 		ModelLogin modelLogin = new ModelLogin();
 
-		String sql = "SELECT*FROM model_login where upper(login)= upper('" + login + "');";
+		String sql = "SELECT*FROM model_login where upper(login)= upper('" + login + "') and useradmin is false;";
 
 		PreparedStatement consulta = connection.prepareStatement(sql);
 
@@ -112,7 +112,7 @@ public class DAOUsuarioRepository {
 	// atualizar
 	public ModelLogin atualizaUsuario(ModelLogin objeto) throws SQLException {
 
-		String sql = "UPDATE model_login SET login=?, senha=?, nome=?, email=? WHERE id=" + objeto.getId() + ";";
+		String sql = "UPDATE model_login SET login=?, senha=?, nome=?, email=? WHERE id=" + objeto.getId() + " and useradmin is false;";
 		PreparedStatement atualiza = connection.prepareStatement(sql);
 		atualiza.setString(1, objeto.getLogin());
 		atualiza.setString(2, objeto.getSenha());
@@ -128,7 +128,7 @@ public class DAOUsuarioRepository {
 	//deletar
 	public void deletarID(String idUser) throws SQLException {
 		
-		String sql="DELETE FROM model_login WHERE id=?;";
+		String sql="DELETE FROM model_login WHERE id=? and useradmin is false;";
 		PreparedStatement delete= connection.prepareStatement(sql);
 		delete.setLong(1, Long.parseLong(idUser));
 		delete.executeUpdate();
@@ -139,7 +139,7 @@ public class DAOUsuarioRepository {
 	public ModelLogin verEditar(String id) throws SQLException {
 		ModelLogin modelLogin = new ModelLogin();
 
-		String sql = "SELECT*FROM model_login where id=?;";
+		String sql = "SELECT*FROM model_login where id=? and useradmin is false;";
 
 		PreparedStatement consulta = connection.prepareStatement(sql);
 		consulta.setLong(1, Long.parseLong(id));
@@ -159,7 +159,31 @@ public class DAOUsuarioRepository {
 		return modelLogin;
 		
 	}
+	public List<ModelLogin> consultaTodosUsuarios() throws SQLException {
 
+		
+		List<ModelLogin> retorno = new ArrayList<ModelLogin>();
+		
+		String sql = "SELECT*FROM model_login where useradmin is false";
+
+		PreparedStatement consulta = connection.prepareStatement(sql);
+
+		ResultSet resultado = consulta.executeQuery(); // execute , não passar o sql duas vezes
+
+		while (resultado.next()) {// se tem resultado, tras ele.
+			
+			ModelLogin modelLogin = new ModelLogin();
+			// preenche o objeto e retornar
+			modelLogin.setId(resultado.getLong("id"));
+			modelLogin.setNome(resultado.getString("nome"));
+			modelLogin.setEmail(resultado.getString("email"));
+			modelLogin.setLogin(resultado.getString("login"));
+			modelLogin.setSenha(resultado.getString("senha"));
+			retorno.add(modelLogin);
+		}
+		return retorno;
+
+	}
 	
 
 	

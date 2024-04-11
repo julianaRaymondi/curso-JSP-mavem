@@ -35,8 +35,15 @@ public class ServletUsuarioController extends HttpServlet {
 			String idUser = request.getParameter("id");
 
 			try {
+				
+				
+				
 				daoUsuarioRepository.deletarID(idUser);
 				request.setAttribute("msg", "Excluido com sucesso!");
+				
+				//fixar tabela		
+				List<ModelLogin> modelLogins= daoUsuarioRepository.consultaTodosUsuarios();
+				request.setAttribute("modelLogins", modelLogins);// preservar dados na tela
 			} catch (SQLException e) {
 
 				e.printStackTrace();
@@ -89,7 +96,10 @@ public class ServletUsuarioController extends HttpServlet {
 			
 				ModelLogin modelLogin = daoUsuarioRepository.verEditar(id);
 						
-						//redirecionar
+				//fixar tabela		
+				List<ModelLogin> modelLogins= daoUsuarioRepository.consultaTodosUsuarios();
+				request.setAttribute("modelLogins", modelLogins);// preservar dados na tela
+				//redirecionar
 				request.setAttribute("msg", "Usuario em edição");
 				request.setAttribute("modelLogin", modelLogin);// preservar dados na tela
 				request.getRequestDispatcher("principal/usuario.jsp").forward(request, response);
@@ -98,6 +108,21 @@ public class ServletUsuarioController extends HttpServlet {
 				
 				e.printStackTrace();
 			}
+			
+			
+		}else if (acao != null && !acao.isEmpty() && acao.equalsIgnoreCase("listarUser")) {
+		
+			try {
+				List<ModelLogin> modelLogins= daoUsuarioRepository.consultaTodosUsuarios();
+				//redirecionar
+				request.setAttribute("msg", "Usuarios carregados");
+				request.setAttribute("modelLogins", modelLogins);// preservar dados na tela
+				request.getRequestDispatcher("principal/usuario.jsp").forward(request, response);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			
 			
 		}
@@ -130,6 +155,11 @@ public class ServletUsuarioController extends HttpServlet {
 			// verificar se o login já existe e se é um novo registro o id ainda é
 			// null.(usuario novo)
 			if (daoUsuarioRepository.validaLogin(modelLogin.getLogin()) && modelLogin.getId() == null) {
+				
+				//fixar tabela		
+				List<ModelLogin> modelLogins= daoUsuarioRepository.consultaTodosUsuarios();
+				request.setAttribute("modelLogins", modelLogins);// preservar dados na tela
+				
 				msg = "Já existe este login tente outro!";
 				request.setAttribute("msg", msg);
 			} else {
@@ -144,6 +174,11 @@ public class ServletUsuarioController extends HttpServlet {
 				modelLogin = daoUsuarioRepository.gravarUsuario(modelLogin);
 
 			}
+			
+			//fixar tabela		
+			List<ModelLogin> modelLogins= daoUsuarioRepository.consultaTodosUsuarios();
+			request.setAttribute("modelLogins", modelLogins);// preservar dados na tela
+			
 			// redirecionar
 			request.setAttribute("msg", msg);
 			request.setAttribute("modelLogin", modelLogin);// preservar dados na tela
